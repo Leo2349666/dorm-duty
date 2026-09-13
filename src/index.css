@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply text-slate-800 antialiased;
+    /* 顶部两团极淡的光晕，比纯白/纯灰底更有质感，又不会抢内容 */
+    background-color: #f5f6fa;
+    background-image:
+      radial-gradient(880px 420px at 8% -10%, rgba(59, 130, 246, 0.1), transparent 62%),
+      radial-gradient(720px 400px at 100% -6%, rgba(99, 102, 241, 0.1), transparent 58%);
+    background-repeat: no-repeat;
+    /* 移动端点击时不要出现灰色高亮块（微信里尤其明显） */
+    -webkit-tap-highlight-color: transparent;
+    /* 禁止 iOS 横屏时自动放大字体 */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* 输入框统一 16px 起步：iOS Safari 里字体小于 16px 会自动放大页面 */
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 16px;
+    font-family: inherit;
+  }
+}
+
+@layer components {
+  /* 主按钮：移动端高度给足，方便手指点 */
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-medium
+           transition duration-150 active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100;
+  }
+  .btn-primary {
+    @apply btn bg-gradient-to-b from-blue-500 to-blue-600 text-white
+           shadow-[0_1px_2px_rgba(37,99,235,0.26),0_7px_16px_-10px_rgba(37,99,235,0.55)]
+           hover:from-blue-600 hover:to-blue-700;
+  }
+  .btn-ghost {
+    @apply btn border border-slate-200 bg-white text-slate-700
+           shadow-[0_1px_2px_rgba(16,24,40,0.04)] hover:bg-slate-50;
+  }
+  .btn-danger {
+    @apply btn border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100;
+  }
+
+  .card {
+    @apply rounded-2xl border border-slate-200/70 bg-white p-4 shadow-soft;
+  }
+
+  /* 卡片里的小标题，全局统一 */
+  .card-title {
+    @apply text-[13px] font-semibold tracking-tight text-slate-900;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3.5 py-3 text-slate-800
+           outline-none transition placeholder:text-slate-400
+           focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10;
+  }
+
+  .label {
+    @apply mb-1.5 block text-[13px] font-medium text-slate-600;
+  }
+
+  .tag {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium;
+  }
+
+  /* 空状态用的大圆图标底 */
+  .empty-icon {
+    @apply mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400;
+  }
+}
+
+/* 隐藏滚动条但保留滚动能力（日历横向滑动用） */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 底部弹层进场动画 */
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.animate-sheet {
+  animation: sheetUp 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade {
+  animation: fadeIn 0.18s ease-out;
+}
