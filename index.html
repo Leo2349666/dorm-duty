@@ -13,7 +13,11 @@
     <!-- iOS 添加到主屏后的表现 -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <title>寝室值日排班</title>
+        <!-- PWA：添加到主屏幕后像 App 一样打开 -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <meta name="apple-mobile-web-app-title" content="值日排班" />
+<title>寝室值日排班</title>
     <style>
       /* 首屏骨架：在 JS 加载完成之前先显示，避免微信里出现纯白屏 */
       #boot {
@@ -49,5 +53,13 @@
       <div>正在加载寝室值日排班…</div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
-  </body>
+      <!-- 注册 Service Worker：只在 https 下注册，本地开发不受影响 -->
+    <script>
+      if ('serviceWorker' in navigator && location.protocol === 'https:') {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {})
+        })
+      }
+    </script>
+</body>
 </html>
