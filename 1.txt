@@ -1,2 +1,76 @@
-C:\Users\23494>curl.exe -k -I --max-time 10 --resolve leo2349666.github.io:443:185.199.108.153 https://leo2349666.github.io/dorm-duty/
-curl: (28) Connection timed out after 10013 milliseconds
+C:\Users\23494>curl.exe -Ivc --max-time 10 https://dorm-duty.com/
+*   Trying 0.0.0.10:80...
+* connect to 0.0.0.10 port 80 from 0.0.0.0 port 56834 failed: Network unreachable
+* Failed to connect to 0.0.0.10:80 after 6 ms: Could not connect to server
+* closing connection #0
+curl: (7) Failed to connect to 0.0.0.10:80 after 6 ms: Could not connect to server
+* Host dorm-duty.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 185.199.110.153, 185.199.109.153, 185.199.111.153, 185.199.108.153
+*   Trying 185.199.110.153:443...
+*   Trying 185.199.109.153:443...
+* schannel: disabled automatic use of client certificate
+* ALPN: curl offers http/1.1
+* ALPN: server accepted http/1.1
+* Established connection to dorm-duty.com (185.199.109.153 port 443) from 10.41.39.199 port 60591
+* using HTTP/1.x
+> HEAD / HTTP/1.1
+> Host: dorm-duty.com
+> User-Agent: curl/8.21.0
+> Accept: */*
+>
+* Request completely sent off
+* schannel: remote party requests renegotiation
+* schannel: renegotiating SSL/TLS connection
+* schannel: SSL/TLS connection renegotiated
+< HTTP/1.1 200 OK
+HTTP/1.1 200 OK
+< Connection: keep-alive
+Connection: keep-alive
+< Content-Length: 2519
+Content-Length: 2519
+< Server: GitHub.com
+Server: GitHub.com
+< Content-Type: text/html; charset=utf-8
+Content-Type: text/html; charset=utf-8
+< Last-Modified: Mon, 14 Sep 2026 03:01:06 GMT
+Last-Modified: Mon, 14 Sep 2026 03:01:06 GMT
+< Access-Control-Allow-Origin: *
+Access-Control-Allow-Origin: *
+< ETag: "6aa76372-9d7"
+ETag: "6aa76372-9d7"
+< expires: Mon, 14 Sep 2026 03:14:17 GMT
+expires: Mon, 14 Sep 2026 03:14:17 GMT
+< Cache-Control: max-age=600
+Cache-Control: max-age=600
+< x-proxy-cache: MISS
+x-proxy-cache: MISS
+< X-GitHub-Request-Id: 7D44:3266DB:A65B00:AE5BC4:6AA76430
+X-GitHub-Request-Id: 7D44:3266DB:A65B00:AE5BC4:6AA76430
+< x-github-edge-region: japaneast
+x-github-edge-region: japaneast
+< Accept-Ranges: bytes
+Accept-Ranges: bytes
+< Age: 0
+Age: 0
+< Date: Mon, 14 Sep 2026 03:04:17 GMT
+Date: Mon, 14 Sep 2026 03:04:17 GMT
+< Via: 1.1 varnish
+Via: 1.1 varnish
+< X-Served-By: cache-itm1220040-ITM
+X-Served-By: cache-itm1220040-ITM
+< X-Cache: MISS
+X-Cache: MISS
+< X-Cache-Hits: 0
+X-Cache-Hits: 0
+< X-Timer: S1789355057.089569,VS0,VE176
+X-Timer: S1789355057.089569,VS0,VE176
+< Vary: Accept-Encoding
+Vary: Accept-Encoding
+< X-Fastly-Request-ID: 6c8623c495308bb88e6aeb28f24466d492924b4f
+X-Fastly-Request-ID: 6c8623c495308bb88e6aeb28f24466d492924b4f
+<
+
+* Connection #1 to host dorm-duty.com:443 left intact
+
+C:\Users\23494>

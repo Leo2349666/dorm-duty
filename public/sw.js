@@ -1,20 +1,22 @@
 /* 寝室值日排班 —— Service Worker
  *
- * 缓存策略（重点是既能秒开、又不会让人看到旧版本）：
+ * 缓存策略：
  *
- *   1. 页面导航（HTML）→ 网络优先。
- *      每次打开都先问服务器要最新的，拿不到（断网）才用缓存兜底。
- *      这样每次 git push 部署的新版本，用户下次打开就能拿到。
+ *   1. 页面导航（HTML）→ 缓存优先 + 后台更新
+ *      打开时立刻用本地缓存渲染（秒开），同时后台去服务器取最新版存起来。
+ *      所以：第二次起瞬间打开；部署新版本后，用户第一次看到旧版、
+ *      第二次就是新版。
  *
- *   2. /assets/ 下的 JS、CSS → 缓存优先。
- *      这些文件名里带内容哈希，内容一变文件名就变，缓存它们永远不会过期。
+ *   2. /assets/ 下的 JS、CSS → 缓存优先
+ *      文件名里带内容哈希，内容一变文件名就变，缓存它们永远不会过期。
+ *      新版本会引入新文件名，所以不会拿到旧代码。
  *
- *   3. 其它同源资源（图标、manifest）→ 先给缓存，同时后台更新。
+ *   3. 其它同源资源（图标、manifest）→ 缓存优先 + 后台更新。
  *
  *   4. 跨域请求（比如 Supabase）→ 一律放行，不缓存。
  */
 
-const CACHE = 'dorm-duty-v1'
+const CACHE = 'dorm-duty-v2'
 
 self.addEventListener('install', () => {
   // 不等旧页面关闭，立刻接管
@@ -45,19 +47,29 @@ self.addEventListener('fetch', (event) => {
   // 只处理同源请求，跨域的（Supabase 等）直接放行
   if (url.origin !== self.location.origin) return
 
-  // ---------- 1. 页面导航：网络优先 ----------
+  // ---------- 1. 页面导航：缓存优先 + 后台更新 ----------
   if (req.mode === 'navigate') {
     event.respondWith(
       (async () => {
-        try {
-          const res = await fetch(req)
-          const cache = await caches.open(CACHE)
-          cache.put('/index.html', res.clone())
-          return res
-        } catch {
-          const cached = await caches.match('/index.html')
-          return cached || Response.error()
+        const cache = await caches.open(CACHE)
+        const cached = await cache.match('/index.html')
+        const network = fetch(req)
+          .then((res) => {
+            if (res && res.status === 200) {
+              cache.put('/index.html', res.clone())
+            }
+            return res
+          })
+          .catch(() => null)
+
+        if (cached) {
+          // 有缓存就立刻返回，让页面秒开；同时把后台更新挂在这个事件上，
+          // 免得 Service Worker 被浏览器提前回收导致更新半途中断
+          event.waitUntil(network)
+          return cached
         }
+        const fresh = await network
+        return fresh || Response.error()
       })(),
     )
     return
@@ -83,16 +95,20 @@ self.addEventListener('fetch', (event) => {
   // ---------- 3. 其它同源资源：先用缓存，同时后台更新 ----------
   event.respondWith(
     (async () => {
-      const cached = await caches.match(req)
+      const cache = await caches.open(CACHE)
+      const cached = await cache.match(req)
       const network = fetch(req)
         .then((res) => {
-          if (res && res.status === 200) {
-            caches.open(CACHE).then((c) => c.put(req, res.clone()))
-          }
+          if (res && res.status === 200) cache.put(req, res.clone())
           return res
         })
-        .catch(() => cached)
-      return cached || network
+        .catch(() => null)
+      if (cached) {
+        event.waitUntil(network)
+        return cached
+      }
+      const fresh = await network
+      return fresh || Response.error()
     })(),
   )
 })
