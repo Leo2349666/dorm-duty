@@ -1,0 +1,2 @@
+C:\Users\23494>curl.exe -k -I --max-time 10 --resolve leo2349666.github.io:443:185.199.108.153 https://leo2349666.github.io/dorm-duty/
+curl: (28) Connection timed out after 10013 milliseconds

@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 // 所以 base 必须写成 "/仓库名/"。如果你的仓库名不是 dorm-duty，
 // 改下面这一行即可（末尾的斜杠不能少）。
 export default defineConfig({
-  base: '/dorm-duty/',
+  base: '/',
   plugins: [react()],
   build: {
     outDir: 'dist',
