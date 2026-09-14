@@ -21,6 +21,7 @@ export default function SettingsPage() {
   const importRoom = useAppStore((s) => s.importRoom)
   const reload = useAppStore((s) => s.reload)
   const refreshRooms = useAppStore((s) => s.refreshRooms)
+  const enterRoom = useAppStore((s) => s.enterRoom)
   const myMember = useMyMember()
   const navigate = useNavigate()
 
@@ -119,9 +120,16 @@ export default function SettingsPage() {
     })
     if (!ok) return
 
-    await importRoom(payload)
+    const targetId = await importRoom(payload)
     refreshRooms()
-    if (payload.room.id === room.id) await reload()
+    if (targetId && targetId === room.id) {
+      // 导入的就是当前这个房间：直接重新读一次
+      await reload()
+    } else if (targetId) {
+      // 导入的是另一个房间：跳过去，别让人以为「什么都没发生」
+      await enterRoom(targetId)
+      navigate(`/room/${targetId}`)
+    }
     toast.success('导入完成')
   }
 

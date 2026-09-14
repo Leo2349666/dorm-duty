@@ -110,7 +110,7 @@ interface AppState {
   generateAll: () => Promise<void>
   regenerateFromCycle: (cycleIndex: number) => Promise<void>
   adjust: (date: string, slots: Slot[], scope: AdjustScope) => Promise<void>
-  importRoom: (payload: ImportPayload) => Promise<void>
+  importRoom: (payload: ImportPayload) => Promise<string | null>
 }
 
 export const useAppStore = create<AppState>((set, get) => {
@@ -583,13 +583,33 @@ export const useAppStore = create<AppState>((set, get) => {
     },
 
     async importRoom(payload) {
-      const { adapter } = get()
-      if (!adapter) return
+      const { adapter, data } = get()
+      if (!adapter) return null
       const { room, members, dutyItems, days } = payload
       const existing = await adapter.findRoom(room.apartment, room.building, room.roomNumber)
       const targetId = existing?.id ?? room.id
 
       if (existing) {
+        // 1) 先把原有排班全部清掉，避免和导入的数据混在一起
+        await adapter.clearPlansFrom(targetId, '0001-01-01')
+
+        // 2) 导入的正是当前打开的这个房间时，把原有的成员和值日项整体停用。
+        //    否则两边 id 不同，saveMembers 只会「新增」，
+        //    结果房间里会同时存在两套人（比如变成 10 个人）。
+        if (data && data.room.id === targetId) {
+          const stamp = new Date().toISOString()
+          const importedMemberIds = new Set(members.map((m) => m.id))
+          const importedItemIds = new Set(dutyItems.map((i) => i.id))
+          const retiredMembers = data.members
+            .filter((m) => !m.deletedAt && !importedMemberIds.has(m.id))
+            .map((m) => ({ ...m, active: false, deletedAt: stamp }))
+          const retiredItems = data.dutyItems
+            .filter((i) => !i.deletedAt && !importedItemIds.has(i.id))
+            .map((i) => ({ ...i, deletedAt: stamp }))
+          if (retiredMembers.length) await adapter.saveMembers(retiredMembers)
+          if (retiredItems.length) await adapter.saveItems(retiredItems)
+        }
+
         await adapter.saveMembers(members)
         await adapter.saveItems(dutyItems)
       } else {
@@ -607,6 +627,7 @@ export const useAppStore = create<AppState>((set, get) => {
         lastOpenedAt: new Date().toISOString(),
       }
       set({ rooms: upsertLocalRoom(ref) })
+      return targetId
     },
   }
 })
